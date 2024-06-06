@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Title } from "../Title"; 
-//import "../../styles/styles.css"; 
+import "../../../styles/styles.css"; 
 import { TextField, Button, Box, Container, Alert, IconButton } from "@mui/material";
 import Autocomplete from "@mui/lab/Autocomplete";
 import { DataGrid } from '@mui/x-data-grid';
@@ -12,6 +12,7 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
   const [productos, setProductos] = useState([]);
   const [venta, setVenta] = useState({
     product_id: '',
+    price: '',
     name: '',
     quantity: 1,
     subtotal: 0
@@ -26,6 +27,7 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
         ...prevData,
         product_id: newValue.id,
         name: newValue.name,
+        price:newValue.price,
         subtotal: newValue.price * venta.quantity
       }));
       setAutocompleteValue(newValue.name);
@@ -51,6 +53,7 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
     setItems([...items, venta]);
     setVenta({
       product_id: '',
+      price:'',
       name: '',
       quantity: 1,
       subtotal: 0
@@ -59,12 +62,14 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
   };
 
   const handleDeleteItem = (id) => {
-    const newItems = items.filter((item) => item.id !== id);
+    const newItems = items.filter((item) => item.product_id !== id);
     setItems(newItems);
   };
 
   const handleEditItem = (id) => {
-    const item = items.find((item) => item.id === id);
+    console.log(id, items);
+    const item = items.find((item) => item.product_id === id);
+    console.log(item);
     setVenta(item);
     handleDeleteItem(id);
   };
@@ -93,6 +98,14 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
         headers: { 'Authorization': `Bearer ${token}` } // Añadir el token aquí
       });
       setMensaje('Venta creada con éxito');
+      setVenta({
+        product_id: '',
+        price:'',
+        name: '',
+        quantity: 1,
+        subtotal: 0
+      });
+      setItems([]);
       console.log(response.data);
     } catch (error) {
       setMensaje('Error al crear la venta');
@@ -122,12 +135,12 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
     }
   ];
 
-  const rows = items.map((item, index) => ({ id: index, ...item }));
+  const rows = items.map((item, index) => ({ id: item.product_id, ...item }));
 
   return (
     <>
       <Container
-        maxWidth="md"
+        maxWidth="xl"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -136,7 +149,7 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
           height: "100vh",
         }}
       >
-        <Box className="myContainer">
+        <Box className="">
           <form onSubmit={handleSubmit} style={{ width: "100%" }}>
             <Title title="Crear Venta" />
             <Box mb={2}>
