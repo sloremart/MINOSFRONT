@@ -36,10 +36,8 @@ const LoginForm = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        console.log("Token JWT recibido:", data.token);
-        console.log("Datos del usuario:", data.user);
-        saveToken(data.token);
-        localStorage.setItem("userData", JSON.stringify(data.user));
+        console.log("Token JWT recibido:", data.access_token);
+        saveToken(data.access_token);
   
         navigate("/ge_documental");
       })
