@@ -36,11 +36,22 @@ const RegisterForm = () => {
     // Configurar la solicitud POST
     const requestOptions = {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: registerData.nombre_completo,
+        user_name: registerData.nom_usuario,
+        document: registerData.cedula,
+        status: registerData.estatus,
+        email: 'sneiderfa_aux@gmail.com',
+        password: registerData.contraseña,
+        password_confirmation: registerData.contraseña
+      })
     };
 
     // Enviar la solicitud
-    fetch("http://127.0.0.1:8000/register", requestOptions)
+    fetch("http://127.0.0.1:8000/api/register", requestOptions)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Error al enviar la solicitud.");
