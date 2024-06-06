@@ -1,6 +1,10 @@
-import React, { useState } from "react";
-import { TextField, Button, Box,  Alert } from "@mui/material";
-import { Title } from "../../commons/components/Title";
+import React, { useState, useEffect } from "react";
+import { TextField, Button, Box, Container, Alert } from "@mui/material";
+import axios from "axios"; // Importa axios
+import { DataGrid } from '@mui/x-data-grid'; // Importa DataGrid de Material-UI
+import { Title } from "../components/Title";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+
 const Product = () => {
   const [productData, setProductData] = useState({
     name: "",
@@ -8,8 +12,9 @@ const Product = () => {
     price: "",
     status: ""
   });
-
   const [responseMessage, setResponseMessage] = useState("");
+  const [salesData, setSalesData] = useState([]);
+  const token = localStorage.getItem("token"); // Obtener token de localStorage
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -19,47 +24,60 @@ const Product = () => {
     }));
   };
 
-  const handleProductSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(productData)
-    };
-
-    fetch("http://localhost:8000/api/products/", requestOptions)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error al enviar la solicitud.");
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/products/",
+        productData,
+        {
+          headers: { Authorization: `Bearer ${token}` }
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Respuesta del servidor:", data);
-        if (data.message) {
-          setResponseMessage(data.message);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setResponseMessage("Error al ingresar el producto.");
-      });
+      );
+      console.log("Respuesta del servidor:", response.data);
+      setResponseMessage("Producto ingresado exitosamente");
+    } catch (error) {
+      console.error("Error:", error);
+      setResponseMessage("Error al ingresar el producto.");
+    }
   };
 
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/products/", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSalesData(response.data);
+      } catch (error) {
+        console.error("Error al obtener las ventas:", error);
+      }
+    };
+
+    fetchSalesData();
+  }, [token]);
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'name', headerName: 'Nombre', width: 200 },
+    { field: 'quantity', headerName: 'Cantidad', width: 150 },
+    { field: 'price', headerName: 'Precio', width: 150 },
+    { field: 'status', headerName: 'Estado', width: 150 },
+    { field: 'created_at', headerName: 'Creado en', width: 200 },
+  ];
+
   return (
-   
+    <Container maxWidth="lg">
       <Box
-        mt={4}
+        mt={8}
         p={4}
         boxShadow={2}
         bgcolor="background.paper"
         borderRadius={8}
+        style={{ textAlign: "center" }}
       >
-        <form onSubmit={handleProductSubmit} style={{ display: "flex", flexDirection: "column" }}>
-        <Title title="ingreso de productos" />
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
+          <Title title="CREACIÓN DE VENTAS" />
           <Box display="flex" flexDirection="row" justifyContent="space-between" mb={2}>
             <TextField
               id="name"
@@ -67,7 +85,6 @@ const Product = () => {
               variant="outlined"
               value={productData.name}
               onChange={handleInputChange}
-     
               margin="normal"
             />
             <TextField
@@ -76,19 +93,18 @@ const Product = () => {
               variant="outlined"
               value={productData.quantity}
               onChange={handleInputChange}
-        
               margin="normal"
             />
-         
-          
             <TextField
               id="price"
               label="Precio"
               variant="outlined"
               value={productData.price}
               onChange={handleInputChange}
-             
               margin="normal"
+              InputProps={{
+                startAdornment: <AttachMoneyIcon />
+              }}
             />
             <TextField
               id="status"
@@ -96,7 +112,6 @@ const Product = () => {
               variant="outlined"
               value={productData.status}
               onChange={handleInputChange}
-           
               margin="normal"
             />
           </Box>
@@ -104,7 +119,7 @@ const Product = () => {
             type="submit"
             variant="contained"
             color="primary"
-      
+            sx={{ width: "200px", height: "40px", alignContent: "center" }}
           >
             Ingresar Producto
           </Button>
@@ -112,18 +127,25 @@ const Product = () => {
         {responseMessage && (
           <Box mt={2}>
             <Alert
-              severity={
-                responseMessage === "Producto ingresado exitosamente"
-                  ? "success"
-                  : "error"
-              }
+              severity={responseMessage === "Producto ingresado exitosamente" ? "success" : "error"}
             >
               {responseMessage}
             </Alert>
           </Box>
         )}
+        <Box mt={4} style={{ height: 400, width: '100%' }}>
+        <Title title="LISTA DE PRODUCTOS" />
+          <DataGrid
+            rows={salesData}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[5, 10, 20]}
+            checkboxSelection
+            disableSelectionOnClick
+          />
+        </Box>
       </Box>
-  
+    </Container>
   );
 };
 
