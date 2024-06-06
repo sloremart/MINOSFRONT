@@ -35,10 +35,12 @@ const LoginForm = () => {
     fetch("http://localhost:8000/api/login", requestOptions)
       .then((response) => response.json())
       .then((data) => {
+
         console.log(data);
         console.log("Token JWT recibido:", data.access_token);
         saveToken(data.access_token);
   
+
         navigate("/ge_documental");
       })
       .catch((error) => {
