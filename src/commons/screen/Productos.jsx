@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { TextField, Button, Box, Container, Alert } from "@mui/material";
 import axios from "axios"; // Importa axios
-import { DataGrid } from '@mui/x-data-grid'; // Importa DataGrid de Material-UI
+import { DataGrid } from "@mui/x-data-grid"; // Importa DataGrid de Material-UI
 import { Title } from "../components/Title";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import { useNavigate } from "react-router-dom";
 
 const Product = () => {
   const [productData, setProductData] = useState({
     name: "",
     quantity: "",
     price: "",
-    status: ""
+    status: "",
   });
   const [responseMessage, setResponseMessage] = useState("");
   const [salesData, setSalesData] = useState([]);
@@ -20,10 +21,10 @@ const Product = () => {
     const { id, value } = e.target;
     setProductData((prevData) => ({
       ...prevData,
-      [id]: value
+      [id]: value,
     }));
   };
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -31,7 +32,7 @@ const Product = () => {
         "http://127.0.0.1:8000/api/products/",
         productData,
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       console.log("Respuesta del servidor:", response.data);
@@ -45,9 +46,12 @@ const Product = () => {
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/products/", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/products/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setSalesData(response.data);
       } catch (error) {
         console.error("Error al obtener las ventas:", error);
@@ -58,14 +62,16 @@ const Product = () => {
   }, [token]);
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 100 },
-    { field: 'name', headerName: 'Nombre', width: 200 },
-    { field: 'quantity', headerName: 'Cantidad', width: 150 },
-    { field: 'price', headerName: 'Precio', width: 150 },
-    { field: 'status', headerName: 'Estado', width: 150 },
-    { field: 'created_at', headerName: 'Creado en', width: 200 },
+    { field: "id", headerName: "ID", width: 100 },
+    { field: "name", headerName: "Nombre", width: 200 },
+    { field: "quantity", headerName: "Cantidad", width: 150 },
+    { field: "price", headerName: "Precio", width: 150 },
+    { field: "status", headerName: "Estado", width: 150 },
+    { field: "created_at", headerName: "Creado en", width: 200 },
   ];
-
+  const handleNavigate = () => {
+    navigate("/ventas"); // Navega a la ruta /dashboard
+  };
   return (
     <Container maxWidth="lg">
       <Box
@@ -76,9 +82,17 @@ const Product = () => {
         borderRadius={8}
         style={{ textAlign: "center" }}
       >
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column" }}
+        >
           <Title title="CREACIÓN DE VENTAS" />
-          <Box display="flex" flexDirection="row" justifyContent="space-between" mb={2}>
+          <Box
+            display="flex"
+            flexDirection="row"
+            justifyContent="space-between"
+            mb={2}
+          >
             <TextField
               id="name"
               label="Nombre del Producto"
@@ -103,7 +117,7 @@ const Product = () => {
               onChange={handleInputChange}
               margin="normal"
               InputProps={{
-                startAdornment: <AttachMoneyIcon />
+                startAdornment: <AttachMoneyIcon />,
               }}
             />
             <TextField
@@ -115,26 +129,46 @@ const Product = () => {
               margin="normal"
             />
           </Box>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ width: "200px", height: "40px", alignContent: "center" }}
+          <Box
+            display="flex"
+            flexDirection="row"
+            justifyContent="space-between"
+            mb={2}
           >
-            Ingresar Producto
-          </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ width: "200px", height: "40px", alignContent: "center" }}
+            >
+              Ingresar Producto
+            </Button>
+
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleNavigate} // Asigna la función de navegación al hacer clic
+              sx={{ width: "200px", height: "40px", alignContent: "center" }}
+            >
+              Ir a Ventas
+            </Button>
+          </Box>
         </form>
         {responseMessage && (
           <Box mt={2}>
             <Alert
-              severity={responseMessage === "Producto ingresado exitosamente" ? "success" : "error"}
+              severity={
+                responseMessage === "Producto ingresado exitosamente"
+                  ? "success"
+                  : "error"
+              }
             >
               {responseMessage}
             </Alert>
           </Box>
         )}
-        <Box mt={4} style={{ height: 400, width: '100%' }}>
         <Title title="LISTA DE PRODUCTOS" />
+        <Box mt={4} style={{ height: 400, width: "100%" }}>
           <DataGrid
             rows={salesData}
             columns={columns}

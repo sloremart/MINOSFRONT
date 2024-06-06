@@ -41,7 +41,7 @@ const LoginForm = () => {
         saveToken(data.access_token);
   
 
-        navigate("/ge_documental");
+        navigate("/productos");
       })
       .catch((error) => {
         console.error("Error al enviar la solicitud:", error);

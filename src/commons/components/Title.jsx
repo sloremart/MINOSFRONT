@@ -8,10 +8,10 @@ export const Title = ({ title, width, fontSize }) => {
         display: "flex",
         background:
           "transparent linear-gradient(45deg, #6BC171 0%, #4CAF50 25%, #43A047 50%, #388E3C 75%, #2E7D32 100%) 0% 0% no-repeat padding-box",
-        width: width || "95%",
+        width: width || "98%",
         marginLeft: "0px",
         marginRight: "50px",
-        height: "40px",
+        height: "50px",
         color: "#fff",
         borderRadius: "10px",
         pl: "10px",

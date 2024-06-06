@@ -1,34 +1,42 @@
 import React, { useState } from "react";
-import { Title } from "../Title"; 
-import "../../../styles/styles.css"; 
-import { TextField, Button, Box, Container, Alert, IconButton } from "@mui/material";
+import { Title } from "../Title";
+import "../../../styles/styles.css";
+import {
+  TextField,
+  Button,
+  Box,
+  Container,
+  Alert,
+  IconButton,
+} from "@mui/material";
 import Autocomplete from "@mui/lab/Autocomplete";
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import axios from 'axios';
-
-const VentaProductos = ({ token }) => { // Recibe el token como prop
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+const VentaProductos = ({ token }) => {
+  // Recibe el token como prop
   const [productos, setProductos] = useState([]);
   const [venta, setVenta] = useState({
-    product_id: '',
-    price: '',
-    name: '',
+    product_id: "",
+    price: "",
+    name: "",
     quantity: 1,
-    subtotal: 0
+    subtotal: 0,
   });
   const [items, setItems] = useState([]);
-  const [mensaje, setMensaje] = useState('');
-  const [autocompleteValue, setAutocompleteValue] = useState('');
-
+  const [mensaje, setMensaje] = useState("");
+  const [autocompleteValue, setAutocompleteValue] = useState("");
+  const navigate = useNavigate();
   const handleAutocompleteChange = (event, newValue) => {
     if (newValue) {
       setVenta((prevData) => ({
         ...prevData,
         product_id: newValue.id,
         name: newValue.name,
-        price:newValue.price,
-        subtotal: newValue.price * venta.quantity
+        price: newValue.price,
+        subtotal: newValue.price * venta.quantity,
       }));
       setAutocompleteValue(newValue.name);
     }
@@ -39,26 +47,36 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
     setVenta((prevData) => ({
       ...prevData,
       [id]: value,
-      subtotal: id === 'quantity' ? prevData.product_id ? productos.find(p => p.id === prevData.product_id).price * value : 0 : prevData.subtotal
+      subtotal:
+        id === "quantity"
+          ? prevData.product_id
+            ? productos.find((p) => p.id === prevData.product_id).price * value
+            : 0
+          : prevData.subtotal,
     }));
   };
 
   const handleAddItem = () => {
     // Validación para evitar productos duplicados
-    if (items.some(item => item.product_id === venta.product_id || item.name === venta.name)) {
-      setMensaje('No se puede agregar el mismo producto dos veces.');
+    if (
+      items.some(
+        (item) =>
+          item.product_id === venta.product_id || item.name === venta.name
+      )
+    ) {
+      setMensaje("No se puede agregar el mismo producto dos veces.");
       return;
     }
-    
+
     setItems([...items, venta]);
     setVenta({
-      product_id: '',
-      price:'',
-      name: '',
+      product_id: "",
+      price: "",
+      name: "",
       quantity: 1,
-      subtotal: 0
+      subtotal: 0,
     });
-    setAutocompleteValue('');
+    setAutocompleteValue("");
   };
 
   const handleDeleteItem = (id) => {
@@ -78,10 +96,13 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
     setAutocompleteValue(value);
     if (value) {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/products/search/search_products`, {
-          params: { query: value },
-          headers: { 'Authorization': `Bearer ${token}` } // Añadir el token aquí
-        });
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/products/search/search_products`,
+          {
+            params: { query: value },
+            headers: { Authorization: `Bearer ${token}` }, // Añadir el token aquí
+          }
+        );
         setProductos(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -94,33 +115,40 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/sales', { products: items }, {
-        headers: { 'Authorization': `Bearer ${token}` } // Añadir el token aquí
-      });
-      setMensaje('Venta creada con éxito');
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/sales",
+        { products: items },
+        {
+          headers: { Authorization: `Bearer ${token}` }, // Añadir el token aquí
+        }
+      );
+      setMensaje("Venta creada con éxito");
       setVenta({
-        product_id: '',
-        price:'',
-        name: '',
+        product_id: "",
+        price: "",
+        name: "",
         quantity: 1,
-        subtotal: 0
+        subtotal: 0,
       });
       setItems([]);
       console.log(response.data);
     } catch (error) {
-      setMensaje('Error al crear la venta');
+      setMensaje("Error al crear la venta");
       console.error(error);
     }
   };
+  const handleNavigate = () => {
+    navigate("/productos"); // Navega a la ruta /dashboard
+  };
 
   const columns = [
-    { field: 'name', headerName: 'Producto', width: 150 },
-    { field: 'price', headerName: 'Precio', width: 150 },
-    { field: 'quantity', headerName: 'Cantidad', width: 150 },
-    { field: 'subtotal', headerName: 'Subtotal', width: 150 },
+    { field: "name", headerName: "Producto", width: 150 },
+    { field: "price", headerName: "Precio", width: 150 },
+    { field: "quantity", headerName: "Cantidad", width: 150 },
+    { field: "subtotal", headerName: "Subtotal", width: 150 },
     {
-      field: 'actions',
-      headerName: 'Acciones',
+      field: "actions",
+      headerName: "Acciones",
       width: 150,
       renderCell: (params) => (
         <>
@@ -131,8 +159,8 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
             <DeleteIcon />
           </IconButton>
         </>
-      )
-    }
+      ),
+    },
   ];
 
   const rows = items.map((item, index) => ({ id: item.product_id, ...item }));
@@ -150,9 +178,9 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
         }}
       >
         <Box className="">
+          <Title title="CREAR VENTA" />
           <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-            <Title title="Crear Venta" />
-            <Box mb={2}>
+            <Box mb={2} marginTop={2}>
               <Autocomplete
                 id="name"
                 options={productos}
@@ -161,7 +189,14 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
                 onChange={handleAutocompleteChange}
                 onInputChange={handleAutocompleteInputChange}
                 inputValue={autocompleteValue}
-                renderInput={(params) => <TextField {...params} label="Buscar Producto" variant="outlined" fullWidth />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Buscar Producto"
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
               />
             </Box>
             <Box mb={2}>
@@ -176,22 +211,57 @@ const VentaProductos = ({ token }) => { // Recibe el token como prop
               />
             </Box>
             <Box mb={2}>
-              <Button type="button" variant="contained" color="primary" fullWidth onClick={handleAddItem}>
+              <Button
+                type="button"
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={handleAddItem}
+                sx={{ width: "200px", height: "40px", alignContent: "center" }}
+              >
                 Agregar Producto
               </Button>
             </Box>
-            <Box style={{ height: 400, width: '100%' }}>
+            <Box style={{ height: 400, width: "100%" }}>
               <DataGrid rows={rows} columns={columns} pageSize={5} />
             </Box>
-            <Box mt={2}>
-              <Button type="submit" variant="contained" color="primary" fullWidth>
-                Crear Venta
-              </Button>
-            </Box>
+            <Box
+  display="flex"
+  flexDirection="row"
+  justifyContent="space-between"
+  mb={2}
+  alignItems="center" // Añade alignItems para centrar los botones verticalmente
+>
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={handleNavigate}
+    sx={{ width: "200px", height: "40px", alignContent: "center" }}
+  >
+    Ir a Productos
+  </Button>
+  <Button
+    type="submit"
+    variant="contained"
+    color="primary"
+    sx={{
+      width: "200px",
+      height: "40px",
+      alignContent: "center",
+    }}
+  >
+    Crear Venta
+  </Button>
+</Box>
+     
           </form>
           {mensaje && (
             <Box mt={2}>
-              <Alert severity={mensaje === "Venta creada con éxito" ? "success" : "error"}>
+              <Alert
+                severity={
+                  mensaje === "Venta creada con éxito" ? "success" : "error"
+                }
+              >
                 {mensaje}
               </Alert>
             </Box>
