@@ -35,12 +35,10 @@ const LoginForm = () => {
     fetch("http://localhost:8000/api/login", requestOptions)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        console.log("Token JWT recibido:", data.token);
-        console.log("Datos del usuario:", data.user);
-        saveToken(data.token);
-        localStorage.setItem("userData", JSON.stringify(data.user));
-  
+        console.log("Datos de respuesta:", data);
+        const accessToken = data.access_token; // Acceder al token de la respuesta
+        console.log("Token JWT recibido:", accessToken);
+        saveToken(accessToken); // Guardar el token
         navigate("/ge_documental");
       })
       .catch((error) => {
