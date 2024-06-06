@@ -7,16 +7,9 @@ import { TextField, Button, Box, Container } from "@mui/material";
 
 const LoginForm = () => {
   const [loginData, setLoginData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
-
-  const handlePasswordChange = (e) => {
-    setLoginData((prevData) => ({
-      ...prevData,
-      password: e.target.value,
-    }));
-  };
 
   const handleLoginInputChange = (e) => {
     const { id, value } = e.target;
@@ -30,14 +23,16 @@ const LoginForm = () => {
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-
-    fetch("http://localhost:8000/login/", {
+  
+    const requestOptions = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(loginData),
-    })
+    };
+  
+    fetch("http://localhost:8000/api/login", requestOptions)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -45,12 +40,11 @@ const LoginForm = () => {
         console.log("Datos del usuario:", data.user);
         saveToken(data.token);
         localStorage.setItem("userData", JSON.stringify(data.user));
-
+  
         navigate("/ge_documental");
       })
       .catch((error) => {
         console.error("Error al enviar la solicitud:", error);
-        console.error("Error response:", error.response);
       });
   };
 
@@ -88,10 +82,10 @@ const LoginForm = () => {
             <Title title="INICIO DE SESIÓN" />
             <Box mb={2}>
               <TextField
-                id="username"
-                label="Usuario"
+                id="email"
+                label="Correo Electrónico"
                 variant="outlined"
-                value={loginData.username}
+                value={loginData.email}
                 onChange={handleLoginInputChange}
                 fullWidth
                 margin="normal"
